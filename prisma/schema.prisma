@@ -50,6 +50,7 @@ model User {
   email            String?   @unique
   username         String?   @unique
   password         String?
+  role             String?    @default("Patient")
   createdAt        DateTime  @default(now())
   updateAt         DateTime  @updatedAt
   name             String?
