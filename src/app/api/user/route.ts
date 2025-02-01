@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import {hash} from "bcryptjs";
 import * as z from "zod";
 
+
 const userSchema = z
   .object({
     email: z.string().min(1, 'Email is required').email('Invalid email'),
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
     try {
             const body = await req.json();
 
-            const {email,username,password} = userSchema.parse(body);
+            const {email,username,role,password} = userSchema.parse(body);
             const existingUserByEmail = await db.user.findUnique({
                 where:{
                     email:email
@@ -45,9 +46,9 @@ export async function POST(req: Request) {
                     email,
                     username,
                     password:hashedPassword,
-                    role,
+                    role:role,
                 }
-            });
+            }); 
             // if(newUser){
             //     return NextResponse.json({user:newUser});
             // }

@@ -72,8 +72,8 @@ model Patient {
   id        String @id @default(cuid())
   userId    String @unique @map("user_id")
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  patientData String?
-  history     String?
+  patientData Json?
+  history     Json?
 
   @@map("patients")
   Doctor Doctor[]
