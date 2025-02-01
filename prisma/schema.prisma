@@ -83,8 +83,12 @@ model Doctor {
   id        String @id @default(cuid())
   userId    String @unique @map("user_id")
   user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  specialization String?
-  experience     Int?
+  name      String?
+  gender    String?
+  degree    String?
+  speciality String?
+  address   String?
+  phone     String?
   patients       Patient[]
   @@map("doctors")
 }

@@ -56,6 +56,7 @@ export function AuthForm({ type }: AuthFormProps) {
 
     const onSubmit = async (data: formSchemaType) => {
         setIsLoading(true);
+       
 
         try {
             
@@ -69,7 +70,7 @@ export function AuthForm({ type }: AuthFormProps) {
             });
 
             const responseData = await response.json();
-            console.log(responseData);
+            // console.log(responseData);
 
             if(responseData.error){
                 toast.error("An error occurred. Please try again later.");

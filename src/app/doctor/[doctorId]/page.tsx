@@ -22,6 +22,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
+import { toast } from "react-toastify";
 
 // Define the validation schema
 const doctorFormSchema = z.object({
@@ -30,7 +31,7 @@ const doctorFormSchema = z.object({
   gender: z.string().min(1, "Please select a gender"),
   address: z.string().min(10, "Address must be at least 10 characters"),
   specialisation: z.string().min(2, "Specialisation must be at least 2 characters"),
-  contact: z.string().min(10, "Contact number must be at least 10 characters"),
+  phone: z.string().min(10, "Contact number must be at least 10 characters"),
 })
 
 // Type for our form
@@ -43,10 +44,16 @@ const defaultValues: Partial<DoctorFormValues> = {
   gender: "",
   address: "",
   specialisation: "",
-  contact: "",
+  phone: "",
 }
 
-export default function DoctorForm() {
+export default function DoctorForm(
+  {
+    params,
+  }: {
+    params: { doctorId: string };
+  }
+) {
   // Initialize the form
   const form = useForm<DoctorFormValues>({
     resolver: zodResolver(doctorFormSchema),
@@ -54,10 +61,34 @@ export default function DoctorForm() {
   })
 
   // Handle form submission
-  function onSubmit(data: DoctorFormValues) {
-    console.log(data)
-    // Handle the form submission here
-  }
+  const onSubmit = async (data: DoctorFormValues) => {
+      const doctor = {
+        userId:params.doctorId,
+        name: data.name,
+        degree: data.degree,
+        gender: data.gender,
+        address: data.address,
+        specialisation: data.specialisation,
+        phone: data.phone,
+  
+      }
+      try {
+        const response = await fetch('/api/doctorregistration', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(doctor),
+        });
+  
+        const responseData = await response.json();
+        if (responseData.error) {
+          toast.error('An error occurred. Please try again later.');
+          return;
+        }
+        toast.success('Patient updated!');
+      } catch (error) {
+        toast.error('An error occurred. Please try again later.');
+      }
+    };
 
   return (
     <div className="container mx-auto py-8">
@@ -121,7 +152,7 @@ export default function DoctorForm() {
 
             <FormField
               control={form.control}
-              name="contact"
+              name="phone"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Contact Number</FormLabel>
