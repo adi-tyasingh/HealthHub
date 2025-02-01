@@ -27,10 +27,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Provider>
-          <ThemeProvider attribute="class" defaultTheme="dark">
+          {/* <ThemeProvider attribute="class" defaultTheme="Light"> */}
             {children}
             <Toaster />
-          </ThemeProvider>
+          {/* </ThemeProvider> */}
         </Provider>
       </body>
     </html>
