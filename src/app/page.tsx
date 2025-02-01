@@ -73,9 +73,9 @@ const Landing = () => {
             Experience the future of healthcare with AI-powered insights and personalized health management.
           </p>
           <div className="flex gap-4 justify-center">
-            <Link href="/login">
+            <Link href="/sign-in">
               <Button size="lg" className="bg-primary hover:bg-primary/90">
-                Get Started
+                Already a member? Sign in!
               </Button>
             </Link>
             <Link href="/about">
@@ -108,7 +108,7 @@ const Landing = () => {
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
             Join thousands of users who are already managing their health more effectively.
           </p>
-          <Link href="/register">
+          <Link href="/sign-up">
             <Button size="lg" className="bg-primary hover:bg-primary/90">
               Sign Up Now
             </Button>
