@@ -8,7 +8,7 @@ import Provider from "@/providers/Provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Entaice",
+  title: "HealthHub",
   description: "Ollama chatbot web interface",
   viewport: {
     width: "device-width",
