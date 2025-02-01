@@ -35,6 +35,7 @@
     "@tabler/icons-react": "^3.26.0",
     "@types/dom-speech-recognition": "^0.0.4",
     "ai": "^3.4.0",
+    "axios": "^1.7.9",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.0",
