@@ -10,13 +10,12 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Entaice",
   description: "Ollama chatbot web interface",
-};
-
-export const viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: 1,
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: true,  // Note: this should be a boolean, not 1
+  },
 };
 
 export default function RootLayout({
