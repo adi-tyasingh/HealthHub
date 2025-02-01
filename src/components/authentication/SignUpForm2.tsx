@@ -23,10 +23,14 @@ import GoogleSignInButton from "@/components/ui/GoogleSignInButton";
 // import GithubSignInButton from "../ui/GithubSigninButton";
 import { IconRocket } from "@tabler/icons-react";
 import { useRouter } from 'next/navigation';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 const formSchema = z.object({
     username: z.string().min(2, "Password must be at least 2 characters long"),
     email: z.string().email("Please enter a valid email address"),
+    role: z.enum(["patient", "doctor"], {
+        required_error: "Please select a role",
+    }),
     password: z.string().min(6, "Password must be at least 6 characters long"),
 });
 
@@ -44,6 +48,7 @@ export function AuthForm({ type }: AuthFormProps) {
             username: "",
             email: "",
             password: "",
+            role: "patient",
         },
     });
 
@@ -175,6 +180,32 @@ export function AuthForm({ type }: AuthFormProps) {
                                         type="password"
                                         {...field}
                                     />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    {/* Role selection field */}
+                    <FormField
+                        control={form.control}
+                        name="role"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Role</FormLabel>
+                                <FormControl>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                    >
+                                        <SelectTrigger className="w-[400px]">
+                                            <SelectValue placeholder="Select your role" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="patient">Patient</SelectItem>
+                                            <SelectItem value="doctor">Doctor</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

@@ -7,6 +7,7 @@ const userSchema = z
   .object({
     email: z.string().min(1, 'Email is required').email('Invalid email'),
     username: z.string().min(1, 'Username is required').max(100),
+    role: z.enum(["patient", "doctor"]).default("patient"), // Role validation
     password: z
       .string()
       .min(1, 'Password is required')
@@ -43,7 +44,8 @@ export async function POST(req: Request) {
                 data:{
                     email,
                     username,
-                    password:hashedPassword
+                    password:hashedPassword,
+                    role,
                 }
             });
             // if(newUser){

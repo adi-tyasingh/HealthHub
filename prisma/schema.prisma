@@ -28,12 +28,14 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
+  
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
 }
+
 
 model Session {
   id           String   @id @default(cuid())
@@ -50,9 +52,9 @@ model User {
   email            String?   @unique
   username         String?   @unique
   password         String?
-  role             String?    @default("Patient")
+  role             String    @default("patient")
   createdAt        DateTime  @default(now())
-  updateAt         DateTime  @updatedAt
+  updatedAt        DateTime  @updatedAt
   name             String?
   emailVerified    DateTime? @map("email_verified")
   image            String?
@@ -60,9 +62,31 @@ model User {
   googleResourceId String?   @unique
   accounts         Account[]
   sessions         Session[]
-
+  patient          Patient?
+  doctor           Doctor?
 
   @@map("users")
+}
+
+model Patient {
+  id        String @id @default(cuid())
+  userId    String @unique @map("user_id")
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  patientData String?
+  history     String?
+
+  @@map("patients")
+  Doctor Doctor[]
+}
+
+model Doctor {
+  id        String @id @default(cuid())
+  userId    String @unique @map("user_id")
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  specialization String?
+  experience     Int?
+  patients       Patient[]
+  @@map("doctors")
 }
 
 model VerificationToken {
