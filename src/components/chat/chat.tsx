@@ -52,7 +52,7 @@ export default function Chat({
 
   return (
     <div className="flex flex-col justify-between w-full max-w-3xl h-full ">
-      <ChatTopbar
+      {/* <ChatTopbar
         setSelectedModel={setSelectedModel}
         isLoading={isLoading}
         chatId={chatId}
@@ -60,7 +60,7 @@ export default function Chat({
         avatar={avatar}
         messages={messages}
         setMessages={setMessages}
-      />
+      /> */}
 
       <ChatList
       chatId={chatId}

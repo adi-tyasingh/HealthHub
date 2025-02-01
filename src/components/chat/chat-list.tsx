@@ -11,12 +11,15 @@ import remarkGfm from "remark-gfm";
 import { INITIAL_QUESTIONS } from "@/utils/initial-questions";
 import { Button } from "../ui/button";
 import useChatStore from "@/app/hooks/useChatStore";
-import { FolderSync, Pencil, RefreshCcw, ImageIcon, Share, Edit } from "lucide-react";
+import { FolderSync, Pencil, RefreshCcw, StopCircle, Volume2 } from "lucide-react";
 import { toast } from "sonner";
+import * as sdk from "microsoft-cognitiveservices-speech-sdk";
+import { set } from "lodash";
 export default function ChatList({
   chatId,
   messages,
   input,
+  avatar,
   handleInputChange,
   handleSubmit,
   isLoading,
@@ -27,6 +30,10 @@ export default function ChatList({
   isMobile,
   setMessages,
 }: ChatProps) {
+
+  
+  
+  
   const isLoadingSubmit = useChatStore((state) => state.isLoadingSubmit);
   const setIsLoadingSubmit = useChatStore((state) => state.setIsLoadingSubmit);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -34,8 +41,7 @@ export default function ChatList({
   const [localStorageIsLoading, setLocalStorageIsLoading] =
     React.useState(true);
   const [initialQuestions, setInitialQuestions] = React.useState<Message[]>([]);
-
-   // console.log("messages: ",messages);
+  const [isSpeaking, setIsSpeaking] = React.useState(false);
 
   const scrollToBottom = () => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -88,31 +94,12 @@ export default function ChatList({
       );
     }, 1);
   };
-
+    
 
   const addMessage = (message: Message) => {
     setMessages((prev) => [...prev, message]);
     window.dispatchEvent(new Event("storage"));
   };
-
-  const buttons = [
-    {
-      title: 'Generate image for this message',
-      Icon: ImageIcon,
-    },
-    {
-      title: 'Share up to this message',
-      Icon: Share,
-    },
-    {
-      title: 'Edit assistant message',
-      Icon: Edit,
-    },
-    {
-      title: 'Regenerate with adjustment',
-      Icon: RefreshCcw,
-    },
-  ];
 
   // console.log("chatId  in chatlist",chatId)
   const handleAPICall = async (userMessage: string) => {
@@ -129,7 +116,7 @@ export default function ChatList({
       // Add the new user message
       allMessages.push({ role: "user", content: userMessage });
       // const response = await fetch("/api/backpro", {
-      const response = await fetch(localStorage.getItem('api_url'), {
+      const response = await fetch( localStorage.getItem('api_url'), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -139,10 +126,6 @@ export default function ChatList({
           model: localStorage.getItem('selectedModel'),
           endpoint: "chat", // Pass the endpoint information
           messages: allMessages, // Your other data (in case of chat)
-          repetition_penalty: parseFloat(localStorage.getItem("repetition_penalty") || "0.9"),
-          temperature: parseFloat(localStorage.getItem("temperature") || "0"),
-          max_tokens: parseInt(localStorage.getItem("max_tokens") || "250"),
-          top_p: parseFloat(localStorage.getItem("top_p") || "0.9"),
           keep_alive: "5m",
           stream: false,
         }),
@@ -176,6 +159,66 @@ export default function ChatList({
     setMessages([...messagesToKeep]);
     console.log("Regenerating from messages:", messagesToKeep);
     handleAPICall(messagesToKeep[messagesToKeep.length - 1].content);
+  };  
+
+
+  const handleTTS = async (index:number,state:boolean) => {
+    const sdk = require("microsoft-cognitiveservices-speech-sdk");
+    // Subscription configuration
+    const speechConfig = sdk.SpeechConfig.fromSubscription("3fe0de3df3c14cbbb5bc1cecc3c78465", "swedencentral");
+    speechConfig.speechSynthesisVoiceName = "en-US-DavisNeural";
+  
+    // Use default speaker output to play audio in the browser
+    const audioConfig = sdk.AudioConfig.fromDefaultSpeakerOutput();
+  
+    // Create the synthesizer and set it to state for access in handleStopTTS
+    const newSynthesizer = new sdk.SpeechSynthesizer(speechConfig, audioConfig);
+  
+  
+    // Start synthesis
+    if(state){
+      setIsSpeaking(true);
+
+      newSynthesizer.speakTextAsync(
+        messages[index+1].content,
+        (result) => {
+        if (result.reason === sdk.ResultReason.SynthesizingAudioCompleted) {
+          console.log("Synthesis finished.");
+        } else {
+          console.error("Speech synthesis canceled: " + result.errorDetails);
+        }
+        newSynthesizer.close();
+         // Clear synthesizer after synthesis is done
+        // setIsSpeaking(false);
+        
+      },
+      (err) => {
+          console.trace("Error - " + err);
+       
+          newSynthesizer.close();
+          setIsSpeaking(false);
+        
+        
+      }
+    );
+    }
+    else{
+      newSynthesizer.close();
+
+      setIsSpeaking(false);
+    }
+  
+    console.log("Synthesizing to browser output...");
+
+  };
+  
+  const handleStopTTS = () => {
+    // console.log("handleStopTTS");
+    // Stop any ongoing synthesis
+     // Clear the synthesizer instance
+      setIsSpeaking(false); // Set isSpeaking to false as it is stopped
+      console.log("Synthesis stopped.");
+
   };
   // messages.map((m) => console.log(m.experimental_attachments))
 
@@ -242,7 +285,7 @@ export default function ChatList({
         {messages.map((message, index) => (
           <div key={index}>
             <motion.div
-
+              
               layout
               initial={{ opacity: 0, scale: 1, y: 20, x: 0 }}
               animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
@@ -282,7 +325,7 @@ export default function ChatList({
                       </div>
                       <p className="text-end">{message.content}</p>
                     </div>
-                    {/* <Avatar className="flex justify-start items-center overflow-hidden">
+                    <Avatar className="flex justify-start items-center overflow-hidden">
                       <AvatarImage
                         src="/"
                         alt="user"
@@ -293,20 +336,20 @@ export default function ChatList({
                       <AvatarFallback>
                         {name && name.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
-                    </Avatar> */}
+                    </Avatar>
                   </div>
                 )}
                 {message.role === "assistant" && (
                   <div className="flex items-end gap-2">
-                    {/* <Avatar className="flex justify-start items-center">
-                      <AvatarImage
-                        src="/ollama.png"
+                    <Avatar className="flex justify-start items-center">
+                      <img
+                        src={avatar}
                         alt="AI"
-                        width={6}
-                        height={6}
-                        className="object-contain dark:invert"
+                        width={40}
+                        height={40}
+                        className="object-contain  rounded-full"
                       />
-                    </Avatar> */}
+                    </Avatar>
                     <span className="bg-accent p-3 rounded-md max-w-xs sm:max-w-2xl overflow-x-auto">
                       {message.content.split("\n").map((part, index) => {
                         // Check if the part is a base64 image string
@@ -321,14 +364,7 @@ export default function ChatList({
                           );
                         } else if (index % 2 === 0) {
                           return (
-                            <Markdown key={index}
-                              remarkPlugins={[remarkGfm]}
-                              components={{
-                                em: ({ node, ...props }) => (
-                                  <em className="lighter-italic" {...props} />
-                                ),
-                              }}
-                            >
+                            <Markdown key={index} remarkPlugins={[remarkGfm]}>
                               {part}
                             </Markdown>
                           );
@@ -355,44 +391,47 @@ export default function ChatList({
             {messages[messages.length - 1].role === "assistant" &&
               index === messages.length - 1 &&
               messages.length > 3 && (
-                // <div className="flex justify-evenly">
-                //   <Button
-                //     onClick={() => handleRegenrate(index - 1)}
-                //     title="Regenerate response"
-                //     className="bg-transparent hover:bg-accent-200 dark:hover:bg-accent-700 text-accent-700 dark:text-accent-300 font-semibold hover:text-white py-2 px-4 hover:bg-stone-700  rounded-xl"
-                //   >
-                //     <RefreshCcw size={18} />
-                //   </Button>
-                // </div>
-                <div className="flex pl-4">
-                  {buttons.map((button, index) => (
-                    <Button
-                      key={index}
-                      title={button.title}
-                      variant={"ghost"}
-                      onClick={() => handleRegenrate(index - 1)}
-                      className="mr-2 px-2 flex items-center justify-center"
-                    >
-                      <button.Icon size={18} className="text-current" />
-                    </Button>
-                  ))}
+                <div className="flex justify-evenly">
+                  <Button
+                    onClick={() => handleRegenrate(index - 1)}
+                    title="Regenerate response"
+                    className="bg-transparent hover:bg-accent-200 dark:hover:bg-accent-700 text-accent-700 dark:text-accent-300 font-semibold hover:text-white py-2 px-4 hover:bg-stone-700  rounded-xl"
+                  >
+                    <RefreshCcw size={18} />
+                  </Button>
+                    
+                     {isSpeaking ? (
+                      <Button
+                      onClick={() => handleTTS(index-1,false)}
+                        title="Stop Text-to-Speech"
+                        className="bg-transparent hover:bg-accent-200 dark:hover:bg-accent-700 text-accent-700 dark:text-accent-300 font-semibold hover:text-white py-2 px-4 hover:bg-stone-700 rounded-xl"
+                      >
+                        <StopCircle size={18} />
+                      </Button>
+                    ):(
+                      <Button
+                      className=" bg-transparent hover:bg-accent-200 dark:hover:bg-accent-700 text-accent-700 dark:text-accent-300 font-semibold hover:text-white py-2 px-4 hover:bg-stone-700  rounded-xl"
+                    
+                      onClick={() => handleTTS(index-1,true)}
+                      >
+                        <Volume2 size={18} />
+                      </Button >
+                    )}
                 </div>
               )}
 
             {messages[messages.length - 2].role === "user" &&
               index === messages.length - 2 &&
-              messages.length > 2 && (
-                <div className="flex justify-end">
-                  <Button className="bg-transparent hover:bg-accent-200 dark:hover:bg-accent-700 text-accent-700 dark:text-accent-300 font-semibold hover:text-white py-2 px-4 hover:bg-stone-700 rounded-xl">
+              messages.length >2 && (
+                  <Button className="bg-transparent hover:bg-accent-200 dark:hover:bg-accent-700 text-accent-700 dark:text-accent-300 font-semibold hover:text-white py-2 px-4 hover:bg-stone-700  rounded-xl">
                     <Pencil size={18} />
                   </Button>
-                </div>
               )}
           </div>
         ))}
         {isLoadingSubmit && (
           <div className="flex pl-4 pb-4 gap-2 items-center">
-            {/* <Avatar className="flex justify-start items-center">
+            <Avatar className="flex justify-start items-center">
               <AvatarImage
                 src="/ollama.png"
                 alt="AI"
@@ -400,7 +439,7 @@ export default function ChatList({
                 height={6}
                 className="object-contain dark:invert"
               />
-            </Avatar> */}
+            </Avatar>
             <div className="bg-accent p-3 rounded-md max-w-xs sm:max-w-2xl overflow-x-auto">
               <div className="flex gap-1">
                 <span className="size-1.5 rounded-full bg-slate-700 motion-safe:animate-[bounce_1s_ease-in-out_infinite] dark:bg-slate-300"></span>

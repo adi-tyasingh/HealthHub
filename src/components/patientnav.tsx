@@ -15,14 +15,14 @@ Bell,
 
 const PatientNavigation = () => {
 const navItems = [
-    { icon: Activity, label: 'Dashboard', path: '/' },
-    { icon: ChartBar, label: 'Symptom Tracker', path: '/symptoms' },
-    { icon: FileText, label: 'Reports', path: '/reports' },
-    { icon: Heart, label: 'Lifestyle', path: '/lifestyle' },
-    { icon: MessageSquare, label: 'Health Chat', path: '/chat' },
-    { icon: Calendar, label: 'Appointments', path: '/appointments' },
-    { icon: Bell, label: 'Notifications', path: '/notifications' },
-    { icon: User, label: 'Profile', path: '/profile' },
+    { icon: Activity, label: 'Dashboard', path: '' },
+    { icon: ChartBar, label: 'Symptom Tracker', path: 'symptoms' },
+    { icon: FileText, label: 'Reports', path: 'reports' },
+    { icon: Heart, label: 'Lifestyle', path: 'lifestyle' },
+    { icon: MessageSquare, label: 'Health Chat', path: 'chat/124' },
+    { icon: Calendar, label: 'Appointments', path: 'appointments' },
+    { icon: Bell, label: 'Notifications', path: 'notifications' },
+    { icon: User, label: 'Profile', path: 'profile' },
 ];
 const path = usePathname()
 
@@ -38,7 +38,7 @@ return (
         return (
             <Link
             key={item.path}
-            href={`${path}/${item.path}`}
+            href={item.path}
             className="flex items-center gap-3 px-4 py-2 text-gray-600 hover:bg-primary/10 hover:text-primary rounded-lg transition-colors"
             >
             <Icon className="w-5 h-5" />
