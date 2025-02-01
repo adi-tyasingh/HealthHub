@@ -18,7 +18,7 @@ interface APIResponse {
       content: string;
     };
   }>;
-}
+}   
 
 export default function FileUploader() {
   const [file, setFile] = useState<FileData | null>(null);
@@ -56,7 +56,7 @@ export default function FileUploader() {
     try {
       console.log(file.data);
       const requestBody = {
-        model: "google/gemini-2.0-flash-thinking-exp:free",
+        model: "meta-llama/llama-3.2-90b-vision-instruct:free",
         messages: [
           {
             role: "user",
