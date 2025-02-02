@@ -102,12 +102,13 @@ model Appointment {
   date        String? // The date of the appointment
   time        String?   // The time of the appointment
   reason      String?  // Reason for the appointment (optional)
+  symptoms    Json?  // Symptoms of the patient (optional)
 
   patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
   doctor      Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
 
   createdAt   DateTime @default(now()) // Timestamp for when the appointment is created
-  updatedAt   DateTime @updatedAt      // Automatically update on record change
+  updatedAt   DateTime @updatedAt       // Automatically update on record change
 
   @@map("appointments")
 }
