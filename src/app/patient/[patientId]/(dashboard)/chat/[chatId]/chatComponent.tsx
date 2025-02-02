@@ -189,51 +189,63 @@ const ChatComponent: React.FC<{ chatId: String }> = () => {
   if (patientData != null) {
     return (
       <div className="flex h-[calc(100dvh)] flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold mb-4">Book Appointment</h1>
-        <div className="p-4 bg-gray-100 rounded-xl shadow-md mb-4">
-          <h2 className="text-xl font-bold mb-2">Patient Information</h2>
-          <pre>{JSON.stringify(patientData, null, 2)}</pre>
-        </div>
-        <Card className="w-full max-w-md p-4">
-          <CardContent>
-            <form onSubmit={handleAppointmentSubmit} className="space-y-4">
-              <div>
-                <Label htmlFor="date">Appointment Date:</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={appointmentDate}
-                  onChange={(e) => setAppointmentDate(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="time">Appointment Time:</Label>
-                <Select onValueChange={(value) => setAppointmentTime(value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a time" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="9:00 AM">9:00 AM</SelectItem>
-                    <SelectItem value="10:00 AM">10:00 AM</SelectItem>
-                    <SelectItem value="11:00 AM">11:00 AM</SelectItem>
-                    <SelectItem value="1:00 PM">1:00 PM</SelectItem>
-                    <SelectItem value="2:00 PM">2:00 PM</SelectItem>
-                    <SelectItem value="3:00 PM">3:00 PM</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button type="submit" className="w-full">Book Appointment</Button>
-            </form>
-            {confirmation && (
-              <div className="mt-4 text-green-600 font-bold">
-                {confirmation}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+      <h1 className="text-2xl font-bold mb-4">Book Appointment</h1>
+      <div className="p-4 bg-gray-100 rounded-xl shadow-md mb-4">
+        <h2 className="text-xl font-bold mb-2">Patient Information</h2>
+        <pre>{JSON.stringify(patientData, null, 2)}</pre>
       </div>
-    );
+      <Card className="w-full max-w-md p-4">
+        <CardContent>
+          <form onSubmit={handleAppointmentSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="date">Appointment Date:</Label>
+              <Input
+                id="date"
+                type="date"
+                value={appointmentDate}
+                onChange={(e) => setAppointmentDate(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="time">Appointment Time:</Label>
+              <Select onValueChange={(value) => setAppointmentTime(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a time" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="9:00 AM">9:00 AM</SelectItem>
+                  <SelectItem value="10:00 AM">10:00 AM</SelectItem>
+                  <SelectItem value="11:00 AM">11:00 AM</SelectItem>
+                  <SelectItem value="1:00 PM">1:00 PM</SelectItem>
+                  <SelectItem value="2:00 PM">2:00 PM</SelectItem>
+                  <SelectItem value="3:00 PM">3:00 PM</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="doctor">Select Doctor:</Label>
+              <Select onValueChange={(value) => setSelectedDoctor(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a doctor" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Atharva Rakshak - asddddddddddd">Atharva Rakshak - asddddddddddd</SelectItem>
+                  <SelectItem value="aditya - jasdklasd">aditya - jasdklasd</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button type="submit" className="w-full">Book Appointment</Button>
+          </form>
+          {confirmation && (
+            <div className="mt-4 text-green-600 font-bold">
+              {confirmation}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
   } else {
     return (
       <main className="flex h-[calc(100dvh)] flex-col items-center">

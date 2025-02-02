@@ -28,7 +28,6 @@ const PatientNavigation = () => {
 
   const navItems = [
     { icon: Activity, label: 'Dashboard', path: '/' },
-    { icon: ChartBar, label: 'Symptom Tracker', path: '/symptoms' },
     { icon: FileText, label: 'Reports', path: '/reports' },
     { icon: MessageSquare, label: 'Health Chat', path: '/chat/124' },
     { icon: Calendar, label: 'Appointments', path: '/appointments' },
