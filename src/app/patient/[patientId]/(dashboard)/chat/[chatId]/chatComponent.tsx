@@ -7,6 +7,11 @@ import { toast } from "sonner";
 import useChatStore from "@/app/hooks/useChatStore";
 import { v4 as uuidv4 } from "uuid";
 import OpenAI from "openai";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 const model = "gpt-4o";
 const apiKey = "86fea170c65341bc9efa5b647e210f45";
@@ -26,6 +31,9 @@ const ChatComponent: React.FC<{ chatId: String }> = () => {
 
   const [chatId, setChatId] = useState<string>("");
   const [patientData, setPatientData] = useState<any>(null);
+  const [appointmentDate, setAppointmentDate] = useState("");
+  const [appointmentTime, setAppointmentTime] = useState("");
+  const [confirmation, setConfirmation] = useState<string | null>(null);
   const formRef = React.useRef<HTMLFormElement>(null);
   const setBase64Images = useChatStore((state) => state.setBase64Images);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
@@ -113,7 +121,6 @@ const ChatComponent: React.FC<{ chatId: String }> = () => {
       });
 
       const jsonResponse = response?.choices?.[0]?.message?.content?.trim();
-      console.log(jsonResponse);
       if (jsonResponse) {
         const jsonStartIndex = jsonResponse.indexOf('{');
         const jsonEndIndex = jsonResponse.lastIndexOf('}') + 1;
@@ -172,14 +179,59 @@ const ChatComponent: React.FC<{ chatId: String }> = () => {
     setBase64Images(null);
   };
 
+  const handleAppointmentSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!appointmentDate || !appointmentTime) return;
+
+    setConfirmation(`Appointment booked for ${appointmentDate} at ${appointmentTime}.`);
+  };
+
   if (patientData != null) {
     return (
       <div className="flex h-[calc(100dvh)] flex-col items-center justify-center">
         <h1 className="text-2xl font-bold mb-4">Book Appointment</h1>
-        <div className="p-4 bg-gray-100 rounded-xl shadow-md">
+        <div className="p-4 bg-gray-100 rounded-xl shadow-md mb-4">
           <h2 className="text-xl font-bold mb-2">Patient Information</h2>
           <pre>{JSON.stringify(patientData, null, 2)}</pre>
         </div>
+        <Card className="w-full max-w-md p-4">
+          <CardContent>
+            <form onSubmit={handleAppointmentSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="date">Appointment Date:</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={appointmentDate}
+                  onChange={(e) => setAppointmentDate(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="time">Appointment Time:</Label>
+                <Select onValueChange={(value) => setAppointmentTime(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="9:00 AM">9:00 AM</SelectItem>
+                    <SelectItem value="10:00 AM">10:00 AM</SelectItem>
+                    <SelectItem value="11:00 AM">11:00 AM</SelectItem>
+                    <SelectItem value="1:00 PM">1:00 PM</SelectItem>
+                    <SelectItem value="2:00 PM">2:00 PM</SelectItem>
+                    <SelectItem value="3:00 PM">3:00 PM</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button type="submit" className="w-full">Book Appointment</Button>
+            </form>
+            {confirmation && (
+              <div className="mt-4 text-green-600 font-bold">
+                {confirmation}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     );
   } else {
@@ -207,4 +259,4 @@ const ChatComponent: React.FC<{ chatId: String }> = () => {
   }
 };
 
-export default ChatComponent; 
+export default ChatComponent;
