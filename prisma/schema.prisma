@@ -77,6 +77,7 @@ model Patient {
 
   @@map("patients")
   Doctor Doctor[]
+  appointments  Appointment[]  
 }
 
 model Doctor {
@@ -90,8 +91,27 @@ model Doctor {
   address   String?
   phone     String?
   patients       Patient[]
+  appointments  Appointment[]  
   @@map("doctors")
 }
+
+model Appointment {
+  id          String   @id @default(cuid()) // Unique identifier for the appointment
+  patientId   String   // Foreign key linking to the Patient
+  doctorId    String   // Foreign key linking to the Doctor
+  date        String? // The date of the appointment
+  time        String?   // The time of the appointment
+  reason      String?  // Reason for the appointment (optional)
+
+  patient     Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  doctor      Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now()) // Timestamp for when the appointment is created
+  updatedAt   DateTime @updatedAt      // Automatically update on record change
+
+  @@map("appointments")
+}
+
 
 model VerificationToken {
   id         String   @id @default(cuid())
