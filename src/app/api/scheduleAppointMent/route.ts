@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     
     // Extract fields from the incoming request
-    const { doctorId, patientId, date, reason } = body;
+    const { doctorId, patientId, date, reason,symptoms } = body;
     console.log({doctorId, patientId, date, reason});
     // const doctor = await db.doctor.findFirst({ where: { name } });
     // const doctorId = doctor?.id || "";
@@ -21,6 +21,7 @@ export async function POST(req: Request) {
         date,
         // time,
         reason,
+        symptoms
       },
     });
 
