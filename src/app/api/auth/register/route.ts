@@ -1,57 +1,68 @@
-import bcrypt from 'bcrypt';
-import { PrismaClient } from '@prisma/client';
-import { NextResponse } from 'next/server';
-import { toast } from 'sonner';
+import { db } from "@/lib/db";
+import { NextResponse } from "next/server";
+import {hash} from "bcryptjs";
+import * as z from "zod";
+import router from "next/navigation";
+import { revalidatePath } from "next/cache";
+
+const userSchema = z
+  .object({
+    email: z.string().min(1, 'Email is required').email('Invalid email'),
+    username: z.string().min(1, 'Username is required').max(100),
+    role: z.enum(["patient", "doctor"]).default("patient"), // Role validation
+    password: z
+      .string()
+      .min(1, 'Password is required')
+      .min(3, 'Password must have more than 3 characters'),
+  })
 
 
-const prisma = new PrismaClient();
 
-export async function POST(req: Request){
-    const body = await req.json();
+export async function POST(req: Request) {
+    try {
+        const body = await req.json();
+        
+        const {email,username,role,password} = userSchema.parse(body);
+        console.log("role: ",role);
+            const existingUserByEmail = await db.user.findUnique({
+                where:{
+                    email:email
+                }
+            });
+            if(existingUserByEmail){
+                return NextResponse.json({user:null,error:"User with this email already exists"},{status:400});
+            }
+            
+            const existingUserByUsername = await db.user.findUnique({
+                where:{
+                    username:username
+                }
+            })
+            if(existingUserByUsername){
+                return NextResponse.json({user:null,error:"User with this username already exists"},{status:400});
+            }
 
-    const {username,email,password} = body;
-    console.log(body);
+            const hashedPassword = await hash(password,10);
+            // console.log("role: ",role);
+            const newUser = await db.user.create({
+                data:{
+                    email,
+                    username,
+                    password:hashedPassword,
+                    role,
+                }
+            }); 
+            // if(newUser){
+            //     return NextResponse.json({user:newUser});
+            // }
 
-    if(!username || !email || !password){
-        return NextResponse.json({error:"Missing username, email, or passowrd"},{status:400});
+            return NextResponse.json({
+                message: "User registered successfully",
+                redirectUrl: newUser.role === "doctor" 
+                    ? `/doctor/${newUser.id}` 
+                    : `/patient/${newUser.id}`
+            });
+    } catch (error) {
+        return NextResponse.json({error:"Something went wrong/ Zod req not satisfied"},{status:500});
     }
-
-
-    const exist = await prisma.user.findUnique({
-        where:{
-            email:email
-        }
-
-    });
-
-    if(exist){
-        return NextResponse.json({error:"Email already exists"},{status:400});
-    }
-
-    const hashedPassword = await bcrypt.hash(password,10);
-
-    const user  = await prisma.user.create({
-        data:{
-            username:username,
-            email:email,
-            password:hashedPassword
-        }
-
-
-    })
-    if(user === null){
-
-        return NextResponse.json({error:"Error creating user"},{status:500});
-    }
-
-
-
-    return NextResponse.json({message:"User created successfully"});
-
-    
-
 }
-
-
-
-

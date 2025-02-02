@@ -55,6 +55,7 @@ export default function ChatBottombar({
     return () => {
       window.removeEventListener("resize", checkScreenWidth);
     };
+    
   }, []);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -95,6 +96,7 @@ export default function ChatBottombar({
       stopVoiceInput();
     }
   }, [isLoading]);
+
   // const apiHeaders = JSON.parse(process.env.NEXT_PUBLIC_API_HEADERS || '');
 
   // API request to the /chat/route POST endpoint
@@ -114,16 +116,8 @@ export default function ChatBottombar({
       messages: [
         {
           role: "system",
-          content: `You are an expert at creating detailed, vivid image prompts for AI image generation, similar to those used for Midjourney. Your task is to take the given message content, system prompt, and recent conversation context, and transform them into a rich, descriptive prompt that will result in a visually stunning and relevant image. The image should reflect the style and context implied by the system prompt and recent messages. Include details about style, mood, lighting, composition, and any relevant visual elements. The prompt should be concise yet comprehensive, typically around 50-100 words.
-
-                1. Subject: Clearly define the main subject of the image.
-                2. Art Style/Medium: Specify the desired art style or medium.
-                3. Environment/Setting: Describe the setting or background.
-                4. Composition and Lighting: Detail the composition, angle, perspective, and lighting conditions.
-                5. Details and Attributes: Include specific details about colors, textures, or distinctive features.
-                
-                The prompt should be concise yet comprehensive, typically around 100-150 words. End the prompt with relevant Midjourney parameters if applicable.
-                MAKE ALL CHARACTERS OVER THE AGE OF 18 - MAKE THIS VERY CLEAR IN THE PROMPT`
+          content: `You are an expert at creating information about medicine.
+          `
         },
         {
           role: "user",
@@ -134,7 +128,7 @@ export default function ChatBottombar({
                 Target Message - this is the current scene you should represent in the image:
                 "${messages[messages.length - 1].content}"
                 
-                Generate an image prompt that captures the essence of the target message while considering the context and style implied by the system prompt and previous messages. Ensure you include all the key elements mentioned in the system message. ALSO MAKE ALL CHARACTERS OVER THE AGE OF 18 - MAKE THIS VERY CLEAR IN THE PROMPT`
+               `
         }
       ],
       model: selectedModel,
@@ -144,7 +138,7 @@ export default function ChatBottombar({
 
     try {
       // const response = await fetch('/api/backpro', {
-      const apiUrl = localStorage.getItem('api_url');
+      const apiUrl = process.env.NEXT_PUBLIC_CHAT_URL; //localStorage.getItem('api_url');
       if (!apiUrl) {
         throw new Error("API URL is not set in localStorage");
       }
@@ -152,34 +146,27 @@ export default function ChatBottombar({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem('api_key')}`
+           "Authorization": `Bearer ${process.env.NEXT_PUBLIC_API_KEY}` //${localStorage.getItem('api_key')}
         },
         body: JSON.stringify({
           model: localStorage.getItem('selectedModel'),// For Openrouter
           endpoint: 'chat',
           messages: messageData.messages,
-          repetition_penalty: parseFloat(localStorage.getItem("repetition_penalty") || "0.9"),          
-          temperature: parseFloat(localStorage.getItem("temperature") || "0"),
-          max_tokens: parseInt(localStorage.getItem("max_tokens") || "250"),
-          top_p: parseFloat(localStorage.getItem("top_p") || "0.9"),
-          guided_choice: [messages[0].content, messages[messages.length - 1].content],
-          smoothing_factor: 1,
           keep_alive: "5m",
           stream: false
         }),
       });
 
-      const result = await response.json();
-      const imagePrompt = result.choices[0].message.content;
-      
+       const result = await response.json();
+       const imagePrompt = result.choices[0].message.content;
       // // const imagePrompt = result.content;
       // // const imagePrompt = result.content;
       // console.log("AI Response: ", imagePrompt);
       // messages.push({ role: "assistant", content: result.message.content, id: React.useState(chatId) })
-
+     
       // First API Call to generate the prompt
       const promptResponse = await fetch('/api/backpro', {
-        // const promptResponse = await fetch('http://20.40.53.64:5000/predictions', {
+      // const promptResponse = await fetch('http://20.40.53.64:5000/predictions', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -197,23 +184,25 @@ export default function ChatBottombar({
         //     output_quality: 80,
         //     disable_safety_checker: true,
         //   },
-
+          
         // }),
       });
-
+    
       if (!promptResponse.ok) {
         throw new Error(`Failed to generate prompt: ${promptResponse.statusText}`);
       }
-
+      
+      console.log(promptResponse);
       const promptResult = await promptResponse.json();
+      console.log("Generated Prompt: ", promptResult);
 
-      addMessage({ role: "assistant", content: promptResult, id: uuidv4() })
+        addMessage({ role: "assistant", content: promptResult, id:  uuidv4() })
 
       // messages.push({ id: uuidv4(), role: "assistant", content:"sdhfsjkfvvcxbcvbgdfgdcvbkjsfd"});
-
+      
       window.dispatchEvent(new Event("storage"));
       setIsLoadingSubmit(false);
-
+    
     } catch (error) {
       console.error("Error fetching image prompt: ", error);
       toast.error("Error occured in generating image ");
@@ -259,7 +248,7 @@ export default function ChatBottombar({
                   onChange={handleInputChange}
                   name="message"
                   placeholder={
-                    !isListening ? "Enter your message here..." : "Listening"
+                    !isListening ? "Enter your prompt here" : "Listening"
                   }
                   className="max-h-24 px-14 bg-accent py-[22px] rounded-lg  text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 w-full flex items-center h-16 resize-none overflow-hidden dark:bg-card"
                 />

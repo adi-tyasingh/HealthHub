@@ -1,388 +1,122 @@
-import fs from "fs";
-import path from "path";
-import Image from "next/image";
-import Link from "next/link";
-import Fuse from "fuse.js";
-import { shuffle } from "lodash";
-import { SearchIcon, UserIcon, PlusIcon, ApertureIcon } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import SearchBar from "@/components/search-Bar";
-import Footer from "@/components/footer";
-// import Logout from "@/components/authentication/Logout";
-// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-
-import Logout from "@/components/authentication/Logout";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+  Activity,
+  MessageSquare,
+  ChartBar,
+  Heart,
+  Shield,
+  Brain,
+} from "lucide-react";
 
-// Define the shape of a character object
-interface CharacterData {
-  id: string;
-  data: {
-    avatar: string;
-    description: string;
-    name: string;
-    tags: string[];
-    extensions: {
-      chub: {
-        full_path: string;
-      };
-    };
-  };
-  introText: string;
-}
-
-async function getTags() {
-  const filePath = path.join(process.cwd(), "public/searchTags.json");
-  const data = fs.readFileSync(filePath, "utf-8");
-  return JSON.parse(data);
-}
-
-async function getCharecters(
-  searchQuery: string,
-  page: number,
-  selectedTags: string[]
-): Promise<{ charecters: CharacterData[]; totalPages: number }> {
-  const directory = path.join(process.cwd(), "src/chubJSONs");
-  const files = fs.readdirSync(directory);
-
-  const allCharacters = files.map((file) => {
-    const filePath = path.join(directory, file);
-    const fileContent = fs.readFileSync(filePath, "utf-8");
-    const characterData = JSON.parse(fileContent) as CharacterData;
-    characterData.id =
-      characterData.data.extensions.chub.full_path.split("/")[1];
-    return characterData;
-  });
-
-  // Filtering characters based on search query and tags
-  let filteredCharacters = allCharacters;
-
-  if (searchQuery) {
-    const fuse = new Fuse(allCharacters, {
-      keys: ["data.name", "introText", "data.tags"],
-      includeScore: true,
-      threshold: 0.6,
-    });
-    const searchResults = fuse.search(searchQuery);
-    filteredCharacters = searchResults.map((result) => result.item);
-  } else {
-    filteredCharacters = shuffle(allCharacters);
-  }
-
-  if (selectedTags.length > 0) {
-    filteredCharacters = filteredCharacters.filter((character) =>
-      selectedTags.every((tag) => character.data.tags.includes(tag))
-    );
-  }
-
-  // Implementing pagination
-  const pageSize = 20;
-  const start = (page - 1) * pageSize;
-  const end = start + pageSize;
-  const paginatedCharacters = filteredCharacters.slice(start, end);
-  const totalPages = Math.ceil(filteredCharacters.length / pageSize);
-
-  return { charecters: paginatedCharacters, totalPages: totalPages };
-}
-
-export default async function CharacterPage({
-  searchParams,
+const Feature = ({
+  icon: Icon,
+  title,
+  description,
 }: {
-  searchParams: { page?: string; search?: string; tag?: string };
-}) {
-  const searchQuery = searchParams.search || "";
-  const selectedTag = searchParams.tag || "";
-  const page = parseInt(searchParams.page || "1", 10);
+  icon: any;
+  title: string;
+  description: string;
+}) => (
+  <div className="flex flex-col items-center p-6 space-y-4 text-center rounded-lg border border-gray-100 hover:border-primary/20 transition-colors">
+    <div className="p-3 rounded-full bg-primary/10">
+      <Icon className="w-6 h-6 text-primary" />
+    </div>
+    <h3 className="text-lg font-semibold">{title}</h3>
+    <p className="text-gray-600">{description}</p>
+  </div>
+);
 
-  // Parse tags from the query string
-  const existingTags = searchParams.tag
-    ? decodeURIComponent(searchParams.tag).split(",")
-    : [];
-
-  const { charecters, totalPages } = await getCharecters(
-    searchQuery,
-    page,
-    existingTags
-  );
-
-  const allTags = await getTags();
-
-  const toggleTag = (tag: string) => {
-    const updatedTags = existingTags.includes(tag)
-      ? existingTags.filter((t) => t !== tag) // Remove tag if already selected
-      : [...existingTags, tag]; // Add tag if not selected
-
-    return encodeURIComponent(updatedTags.join(","));
-  };
+const Landing = () => {
+  const features = [
+    {
+      icon: Activity,
+      title: "Symptom Tracking",
+      description: "Monitor your symptoms daily with our intelligent tracking system",
+    },
+    {
+      icon: Brain,
+      title: "AI-Powered Insights",
+      description: "Get personalized health insights powered by advanced AI",
+    },
+    {
+      icon: ChartBar,
+      title: "Health Analytics",
+      description: "Visualize your health trends with detailed analytics",
+    },
+    {
+      icon: MessageSquare,
+      title: "24/7 Health Assistant",
+      description: "Chat with our AI health assistant anytime, anywhere",
+    },
+    {
+      icon: Heart,
+      title: "Lifestyle Management",
+      description: "Personalized recommendations for a healthier lifestyle",
+    },
+    {
+      icon: Shield,
+      title: "Secure & Private",
+      description: "Your health data is protected with enterprise-grade security",
+    },
+  ];
 
   return (
-    <main className="flex flex-col items-center  bg-gradient-to-r from-black to-gray-800 min-h-screen">
-      {/* Floating Search Bar */}
-      <div className="sticky top-0 md:p-4 z-10  w-full backdrop-blur-md">
-        
-      <SearchBar searchQuery={searchQuery} />
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <div className="relative bg-gradient-to-b from-primary/5 to-transparent">
+        <div className="container mx-auto px-4 py-20 text-center">
+          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+            Your Personal Health Dashboard
+          </h1>
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Experience the future of healthcare with AI-powered insights and personalized health management.
+          </p>
+          <div className="flex gap-4 justify-center">
+            <Link href="/sign-in">
+              <Button size="lg" className="bg-primary hover:bg-primary/90">
+                Already a member? Sign in!
+              </Button>
+            </Link>
+            <Link href="/about">
+              <Button size="lg" variant="outline">
+                Learn More
+              </Button>
+            </Link>
+          </div>
+        </div>
       </div>
 
-      {/* Tag Filter */}
-
-      <DropdownMenu >
-        <DropdownMenuTrigger className="pt-4">
-          <p>Filter By Tags</p>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuLabel>
-            <div className="flex justify-between">
-              {"Click to select "}
-              {existingTags.length > 0 && (
-                <Link
-                  href={`/?search=${searchQuery}`}
-                  className="px-3 py-1 rounded-full text-sm bg-red-500 text-white"
-                >
-                  Clear Tag Filter
-                </Link>
-              )}
-            </div>
-          </DropdownMenuLabel>
-          
-            <div className="flex flex-wrap gap-2 p-2 overflow-scroll w-screen md:w-[800px] h-[400px] justify-center">
-              {allTags
-                .map((tag: string) => (
-                  <DropdownMenuItem key={tag} className="flex">
-                    <Link
-                      href={`/?search=${searchQuery}&tag=${toggleTag(tag)}`}
-                      className={`px-3 py-1 rounded-full text-sm transition-colors duration-200 ${
-                        existingTags.includes(tag)
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-700 text-gray-300 hover:bg-blue-600"
-                      }`}
-                    >
-                      {tag}
-                    </Link>
-                  </DropdownMenuItem>
-                ))}
-            </div>
-    
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* Characters Grid */}
-      <div className=" grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-8">
-        {charecters.length > 0 ? (
-          charecters.map((character) => {
-            const characterID = character.id;
-            return (
-              <Link href={`/chat/${characterID}`} key={characterID}>
-                <div className="bg-darkGray rounded-xl shadow-lg p-4 max-w-xs mx-auto h-full relative hover:bg-gray-800 transition-colors duration-300">
-                  {/* Image Section */}
-                  <img
-                    src={character.data.avatar}
-                    alt={character.data.name}
-                    className="rounded-t-xl w-full h-66 object-cover"
-                  />
-                  {/* Likes Section */}
-
-                  {/* Content Section */}
-                  <div className="mt-4 text-white">
-                    <h3 className="text-xl font-bold">{character.data.name}</h3>
-                    <p className="mt-2 text-sm text-gray-300">
-                      {character?.introText?.length > 80
-                        ? character.introText.slice(0, 80) + "..."
-                        : character?.introText || "No description available"}
-                    </p>
-                    {/* Tags */}
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      {character.data.tags.map((tag, index) => (
-                        <span
-                          key={index}
-                          className="bg-gray-700 text-gray-100 px-2 py-1 text-xs rounded-md"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            );
-          })
-        ) : (
-          <p>No characters found for the selected filters.</p>
-        )}
+      {/* Features Section */}
+      <div className="container mx-auto px-4 py-20">
+        <h2 className="text-3xl font-bold text-center mb-12">
+          Comprehensive Health Management
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {features.map((feature, index) => (
+            <Feature key={index} {...feature} />
+          ))}
+        </div>
       </div>
 
-      {/* Pagination */}
-      <Pagination className="flex justify-center items-center space-x-2 mt-4">
-        <PaginationContent className="flex flex-wrap justify-center items-center gap-2">
-          {/* Previous Page */}
-          <PaginationItem>
-            {page > 1 ? (
-              <PaginationPrevious
-                href={`/?page=${
-                  page - 1
-                }&search=${searchQuery}&tag=${existingTags.join(",")}`}
-              />
-            ) : (
-              <PaginationPrevious
-                href="#"
-                className="cursor-not-allowed opacity-50"
-              />
-            )}
-          </PaginationItem>
-
-          {/* For Small Screens: Only Show Current Page */}
-          <div className="flex lg:hidden">
-            {page > 3 && (
-              <PaginationItem>
-                <PaginationLink
-                  href={`/?page=1&search=${searchQuery}&tag=${existingTags.join(
-                    ","
-                  )}`}
-                >
-                  1
-                </PaginationLink>
-              </PaginationItem>
-            )}
-            {/* Ellipsis Before Current Page */}
-            {page > 4 && (
-              <PaginationItem>
-                <PaginationEllipsis />
-              </PaginationItem>
-            )}
-            {/* Page Numbers Around Current Page */}
-            {Array.from({ length: 3 }, (_, index) => {
-              const currentPage = page - 2 + index;
-              if (currentPage > 0 && currentPage <= totalPages) {
-                return (
-                  <PaginationItem key={currentPage}>
-                    <PaginationLink
-                      href={`/?page=${currentPage}&search=${searchQuery}&tag=${existingTags.join(
-                        ","
-                      )}`}
-                      isActive={currentPage === page}
-                    >
-                      {currentPage}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              }
-              return null;
-            })}
-            {/* Ellipsis After Current Page */}
-            {page + 2 < totalPages && (
-              <PaginationItem>
-                <PaginationEllipsis />
-              </PaginationItem>
-            )}
-            {/* Last Page */}
-            {page + 2 < totalPages && (
-              <PaginationItem>
-                <PaginationLink
-                  href={`/?page=${totalPages}&search=${searchQuery}&tag=${existingTags.join(
-                    ","
-                  )}`}
-                >
-                  {totalPages}
-                </PaginationLink>
-              </PaginationItem>
-            )}
-          </div>
-
-          {/* For Larger Screens: Full Pagination */}
-          <div className="hidden lg:flex gap-2">
-            {/* First Page */}
-            {page > 3 && (
-              <PaginationItem>
-                <PaginationLink
-                  href={`/?page=1&search=${searchQuery}&tag=${existingTags.join(
-                    ","
-                  )}`}
-                >
-                  1
-                </PaginationLink>
-              </PaginationItem>
-            )}
-            {/* Ellipsis Before Current Page */}
-            {page > 4 && (
-              <PaginationItem>
-                <PaginationEllipsis />
-              </PaginationItem>
-            )}
-            {/* Page Numbers Around Current Page */}
-            {Array.from({ length: 5 }, (_, index) => {
-              const currentPage = page - 2 + index;
-              if (currentPage > 0 && currentPage <= totalPages) {
-                return (
-                  <PaginationItem key={currentPage}>
-                    <PaginationLink
-                      href={`/?page=${currentPage}&search=${searchQuery}&tag=${existingTags.join(
-                        ","
-                      )}`}
-                      isActive={currentPage === page}
-                    >
-                      {currentPage}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              }
-              return null;
-            })}
-            {/* Ellipsis After Current Page */}
-            {page + 2 < totalPages && (
-              <PaginationItem>
-                <PaginationEllipsis />
-              </PaginationItem>
-            )}
-            {/* Last Page */}
-            {page + 2 < totalPages && (
-              <PaginationItem>
-                <PaginationLink
-                  href={`/?page=${totalPages}&search=${searchQuery}&tag=${existingTags.join(
-                    ","
-                  )}`}
-                >
-                  {totalPages}
-                </PaginationLink>
-              </PaginationItem>
-            )}
-          </div>
-
-          {/* Next Page */}
-          <PaginationItem>
-            {page < totalPages ? (
-              <PaginationNext
-                href={`/?page=${
-                  page + 1
-                }&search=${searchQuery}&tag=${existingTags.join(",")}`}
-              />
-            ) : (
-              <PaginationNext
-                href="#"
-                className="cursor-not-allowed opacity-50"
-              />
-            )}
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
-
-      <Footer />
-    </main>
+      {/* CTA Section */}
+      <div className="bg-primary/5 py-20">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold mb-6">
+            Ready to Take Control of Your Health?
+          </h2>
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Join thousands of users who are already managing their health more effectively.
+          </p>
+          <Link href="/sign-up">
+            <Button size="lg" className="bg-primary hover:bg-primary/90">
+              Sign Up Now
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </div>
   );
-}
+};
+
+export default Landing;

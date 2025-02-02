@@ -8,15 +8,14 @@ import Provider from "@/providers/Provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Entaice",
+  title: "HealthHub",
   description: "Ollama chatbot web interface",
-};
-
-export const viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: 1,
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: true,  // Note: this should be a boolean, not 1
+  },
 };
 
 export default function RootLayout({
@@ -28,10 +27,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Provider>
-          <ThemeProvider attribute="class" defaultTheme="dark">
+          {/* <ThemeProvider attribute="class" defaultTheme="Light"> */}
             {children}
             <Toaster />
-          </ThemeProvider>
+          {/* </ThemeProvider> */}
         </Provider>
       </body>
     </html>
