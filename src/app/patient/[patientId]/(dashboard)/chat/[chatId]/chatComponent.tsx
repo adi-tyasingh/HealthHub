@@ -12,10 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
 
 const model = "gpt-4o";
 const apiKey = "86fea170c65341bc9efa5b647e210f45";
@@ -26,14 +22,6 @@ const openai = new OpenAI({
   defaultHeaders: { "api-key": apiKey },
   dangerouslyAllowBrowser: true,
 });
-// / Validation schema
-const appointmentSchema = z.object({
-  date: z.string().min(1, "Please select a date"),
-  time: z.string().min(1, "Please select a time"),
-});
-
-// Type inference for form values
-type AppointmentFormValues = z.infer<typeof appointmentSchema>;
 
 const ChatComponent: React.FC<{ chatId: String }> = () => {
   const { messages, input, handleInputChange, isLoading, error, stop, setMessages, setInput } = useChat();
@@ -198,94 +186,13 @@ const ChatComponent: React.FC<{ chatId: String }> = () => {
     setConfirmation(`Appointment booked for ${appointmentDate} at ${appointmentTime}.`);
   };
 
-  
-
   if (patientData != null) {
-
-    const form = useForm<AppointmentFormValues>({
-      resolver: zodResolver(appointmentSchema),
-      defaultValues: {
-        date: "",
-        time: "",
-      },
-    });
-  
-    const onSubmit = async (data: AppointmentFormValues) => {
-      try {
-        const response = await fetch("/api/scheduleAppointment", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...data, patientId: patientData.id }),
-        });
-  
-        const responseData = await response.json();
-        if (responseData.error) {
-          toast.error("An error occurred. Please try again later.");
-          return;
-        }
-        toast.success("Appointment booked successfully!");
-      } catch (error) {
-        toast.error("An error occurred. Please try again later.");
-      }
-    };
-  
     return (
-      <>
       <div className="flex h-[calc(100dvh)] flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold mb-4">Book Appointment</h1>
-        <div className="p-4 bg-gray-100 rounded-xl shadow-md mb-4">
-          <h2 className="text-xl font-bold mb-2">Patient Information</h2>
-          <pre>{JSON.stringify(patientData, null, 2)}</pre>
-        </div>
-        <Card className="w-full max-w-md p-4">
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="date"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Appointment Date</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="time"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Appointment Time</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a time" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="9:00 AM">9:00 AM</SelectItem>
-                          <SelectItem value="10:00 AM">10:00 AM</SelectItem>
-                          <SelectItem value="11:00 AM">11:00 AM</SelectItem>
-                          <SelectItem value="1:00 PM">1:00 PM</SelectItem>
-                          <SelectItem value="2:00 PM">2:00 PM</SelectItem>
-                          <SelectItem value="3:00 PM">3:00 PM</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full">
-                  Book Appointment
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
+      <h1 className="text-2xl font-bold mb-4">Book Appointment</h1>
+      <div className="p-4 bg-gray-100 rounded-xl shadow-md mb-4">
+        <h2 className="text-xl font-bold mb-2">Patient Information</h2>
+        <pre>{JSON.stringify(patientData, null, 2)}</pre>
       </div>
       <Card className="w-full max-w-md p-4">
         <CardContent>
@@ -338,7 +245,6 @@ const ChatComponent: React.FC<{ chatId: String }> = () => {
         </CardContent>
       </Card>
     </div>
-    </>
   );
   } else {
     return (
