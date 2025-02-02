@@ -2,12 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Activity, Users, UserPlus } from 'lucide-react';
+import { Activity, Users, Handshake, UserPlus } from 'lucide-react';
 
 const doctorNavItems = [
   { icon: Activity, label: 'Dashboard', path: '/' },
   { icon: Users, label: 'Patients', path: '/getPatients' },
-  { icon: UserPlus, label: 'Add Patients', path: '/add-patients' },
+    { icon: Handshake, label: 'Appointments', path: '/appointments' },
 ];
 
 const DoctorNavigation = () => {
