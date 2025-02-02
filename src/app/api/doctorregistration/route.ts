@@ -33,15 +33,13 @@ export async function POST(req: Request) {
     // Create a new patient row 
     const newDoctor = await db.doctor.create({
       data: {
-        userId: validatedData.userId,
+        userId: validatedData.userId, 
         name: validatedData.name,
         degree: validatedData.degree,
         gender: validatedData.gender,
         address: validatedData.address,
         speciality: validatedData.specialisation,
         phone: validatedData.phone,
-
-
       },
     });
 

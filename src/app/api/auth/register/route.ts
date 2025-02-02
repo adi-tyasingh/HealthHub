@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import {hash} from "bcryptjs";
 import * as z from "zod";
 import router from "next/navigation";
+import { revalidatePath } from "next/cache";
 
 const userSchema = z
   .object({
@@ -55,8 +56,12 @@ export async function POST(req: Request) {
             //     return NextResponse.json({user:newUser});
             // }
 
-            const {password:newUserPassword, ...rest }=newUser ;
-            return NextResponse.redirect(new URL(`/patient/${newUser.id}`, req.url)); // Corrected redirect handling
+            return NextResponse.json({
+                message: "User registered successfully",
+                redirectUrl: newUser.role === "doctor" 
+                    ? `/doctor/${newUser.id}` 
+                    : `/patient/${newUser.id}`
+            });
     } catch (error) {
         return NextResponse.json({error:"Something went wrong/ Zod req not satisfied"},{status:500});
     }

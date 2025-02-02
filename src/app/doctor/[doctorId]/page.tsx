@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { toast } from "react-toastify";
+import { useRouter } from 'next/navigation';
 
 // Define the validation schema
 const doctorFormSchema = z.object({
@@ -54,6 +55,7 @@ export default function DoctorForm(
     params: { doctorId: string };
   }
 ) {
+  const router = useRouter();
   // Initialize the form
   const form = useForm<DoctorFormValues>({
     resolver: zodResolver(doctorFormSchema),
@@ -85,6 +87,7 @@ export default function DoctorForm(
           return;
         }
         toast.success('Patient updated!');
+        router.push(`/doctor/${params.doctorId}/dashboard`);
       } catch (error) {
         toast.error('An error occurred. Please try again later.');
       }

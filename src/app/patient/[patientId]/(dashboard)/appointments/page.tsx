@@ -51,7 +51,7 @@ const AppointmentScheduler: React.FC = () => {
   const [doctors, setDoctors] = useState<any[]>([]);  // State for storing doctors
   const [loading, setLoading] = useState(true);  // State for loading indicator
   const [error, setError] = useState<string | null>(null);  // State for error handling
-
+  const [patientId, setPatientId] = useState<string | null>(null);
   // Fetch doctors from the API
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -88,6 +88,10 @@ const AppointmentScheduler: React.FC = () => {
     },
   });
 
+  const currentPath = window.location.pathname;
+  const patientIdFromPath = currentPath.split('/')[2];
+  setPatientId(patientIdFromPath); 
+  console.log("pId",patientId)
   const onSubmit = async (data: AppointmentFormValues) => {
     console.log("Form submitted:", data);
   
@@ -100,8 +104,8 @@ const AppointmentScheduler: React.FC = () => {
         },
         body: JSON.stringify({
           doctorId: data.doctorId,
-          patientId: "cm6mtk19h0002ur1k1g89g2az" , // Make sure you get the patientId correctly
-          date: data.date,
+          patientId: "cm6n4y0jr0006urhcbba9381y" , // Make sure you get the patientId correctly
+          date: data.date,  
           // time: data.time,
           reason: data.reason || null,  // Optional reason field
         }),

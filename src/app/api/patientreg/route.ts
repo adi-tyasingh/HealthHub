@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { redirect } from "next/dist/server/api-utils";
 import { z } from "zod";
 
 const patientSchema = z.object({
@@ -41,6 +42,8 @@ export async function POST(req: Request) {
       history: newPatient.history
     };
 
+    
+   
     return new Response(JSON.stringify({ success: true, data: response }), {
       status: 201,
       headers: { "Content-Type": "application/json" },

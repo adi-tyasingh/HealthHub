@@ -82,7 +82,7 @@ export function AuthForm({ type }: AuthFormProps) {
                 });
             }
             
-            router.push("/sign-in");
+            router.push(responseData.redirectUrl); 
     
         } catch (error) {
             toast.error("An error occurred. Please try again later.");
